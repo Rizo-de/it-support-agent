@@ -19,47 +19,74 @@ def home():
 
 @app.route("/chat", methods=["POST"])
 def chat():
-    data = request.get_json()
+    try:
+        data = request.get_json()
 
-    if not data or "message" not in data:
-        return jsonify({"error": "Keine Nachricht erhalten"}), 400
+        if not data or "message" not in data:
+            return jsonify({
+                "error": "Keine Nachricht erhalten"
+            }), 400
 
-    user_message = data["message"]
+        user_message = data["message"]
 
-    response = requests.post(
-        "https://openrouter.ai/api/v1/chat/completions",
-        headers={
-            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-            "Content-Type": "application/json"
-        },
-        json={
-            "model": MODEL,
-            "messages": [
-                {
-                    "role": "system",
-                    "content": "You are an IT Support Assistant. Help users troubleshoot common computer and Windows problems clearly and safely."
-                },
-                {
-                    "role": "user",
-                    "content": user_message
-                }
-            ]
-        }
-    )
+        response = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "model": MODEL,
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": (
+                            "You are an IT Support Assistant. "
+                            "Help users troubleshoot common computer "
+                            "and Windows problems clearly and safely."
+                        )
+                    },
+                    {
+                        "role": "user",
+                        "content": user_message
+                    }
+                ]
+            },
+            timeout=60
+        )
 
-    if response.status_code != 200:
+        if response.status_code != 200:
+            return jsonify({
+                "error": "OpenRouter Fehler",
+                "status_code": response.status_code,
+                "details": response.text
+            }), response.status_code
+
+        result = response.json()
+
+        answer = result["choices"][0]["message"]["content"]
+
         return jsonify({
-            "error": "OpenRouter Fehler",
-            "details": response.text
-        }), response.status_code
+            "answer": answer
+        })
 
-    result = response.json()
+    except requests.RequestException as e:
+        return jsonify({
+            "error": "Verbindung zu OpenRouter fehlgeschlagen",
+            "details": str(e)
+        }), 502
 
-    answer = result["choices"][0]["message"]["content"]
+    except (ValueError, KeyError, IndexError, TypeError) as e:
+        return jsonify({
+            "error": "Ungültige Antwort von OpenRouter",
+            "details": str(e)
+        }), 502
 
-    return jsonify({
-        "answer": answer
-    })
+    except Exception as e:
+        return jsonify({
+            "error": "Interner Serverfehler",
+            "details": str(e)
+        }), 500
 
 
 if __name__ == "__main__":
