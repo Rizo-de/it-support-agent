@@ -1,0 +1,165 @@
+[
+    {
+        "id": 1,
+        "category": "network",
+        "problem": "Internetverbindung funktioniert nicht",
+        "keywords": [
+            "internet funktioniert nicht",
+            "kein internet",
+            "internet geht nicht",
+            "keine internetverbindung",
+            "internet verbindung"
+        ],
+        "diagnosis": [
+            "Netzwerkverbindung prüfen",
+            "ipconfig ausführen",
+            "Standardgateway prüfen",
+            "Gateway anpingen",
+            "8.8.8.8 anpingen",
+            "DNS mit nslookup prüfen"
+        ],
+        "commands": [
+            "ipconfig",
+            "ping 8.8.8.8",
+            "nslookup google.com"
+        ],
+        "solution": "Wenn keine IP-Adresse vorhanden ist, Netzwerkadapter und DHCP-Verbindung prüfen. Wenn 8.8.8.8 erreichbar ist, aber google.com nicht aufgelöst werden kann, liegt wahrscheinlich ein DNS-Problem vor."
+    },
+    {
+        "id": 2,
+        "category": "performance",
+        "problem": "Computer ist langsam",
+        "keywords": [
+            "computer ist langsam",
+            "pc ist langsam",
+            "windows ist langsam",
+            "computer langsam",
+            "pc langsam"
+        ],
+        "diagnosis": [
+            "Task-Manager öffnen",
+            "CPU-Auslastung prüfen",
+            "Arbeitsspeicher prüfen",
+            "Datenträgerauslastung prüfen",
+            "Autostart-Programme prüfen"
+        ],
+        "commands": [
+            "taskmgr"
+        ],
+        "solution": "Task-Manager öffnen und CPU, Arbeitsspeicher und Datenträger prüfen. Einen auffällig stark ausgelasteten Prozess identifizieren und anschließend prüfen, ob er für das Problem verantwortlich ist."
+    },
+    {
+        "id": 3,
+        "category": "printer",
+        "problem": "Drucker funktioniert nicht",
+        "keywords": [
+            "drucker funktioniert nicht",
+            "drucker geht nicht",
+            "drucker druckt nicht",
+            "kann nicht drucken",
+            "druckproblem"
+        ],
+        "diagnosis": [
+            "Drucker eingeschaltet prüfen",
+            "Verbindung prüfen",
+            "Drucker in Windows prüfen",
+            "Druckwarteschlange prüfen",
+            "Testseite drucken"
+        ],
+        "commands": [
+            "control printers"
+        ],
+        "solution": "Zuerst prüfen, ob der Drucker eingeschaltet und verbunden ist. Danach den Drucker in Windows öffnen und eine Testseite drucken. Bei einer blockierten Warteschlange die ausstehenden Druckaufträge prüfen."
+    },
+    {
+        "id": 4,
+        "category": "windows_update",
+        "problem": "Windows Update funktioniert nicht",
+        "keywords": [
+            "windows update funktioniert nicht",
+            "windows update fehler",
+            "windows update geht nicht",
+            "update funktioniert nicht",
+            "update fehler"
+        ],
+        "diagnosis": [
+            "Fehlercode prüfen",
+            "Windows Update erneut starten",
+            "Windows Update Problembehandlung ausführen",
+            "Systemdateien prüfen"
+        ],
+        "commands": [
+            "winver",
+            "sfc /scannow"
+        ],
+        "solution": "Zuerst den angezeigten Fehlercode notieren und die Windows-Update-Problembehandlung ausführen. Bei möglichen beschädigten Systemdateien kann anschließend SFC geprüft werden."
+    },
+    {
+        "id": 5,
+        "category": "driver",
+        "problem": "Treiberproblem",
+        "keywords": [
+            "treiber funktioniert nicht",
+            "treiber fehlt",
+            "treiber nicht gefunden",
+            "gerät funktioniert nicht",
+            "unbekanntes gerät"
+        ],
+        "diagnosis": [
+            "Geräte-Manager öffnen",
+            "betroffenes Gerät suchen",
+            "gelbes Warnsymbol prüfen",
+            "Gerätestatus prüfen",
+            "Hardware-ID prüfen"
+        ],
+        "commands": [
+            "devmgmt.msc"
+        ],
+        "solution": "Geräte-Manager öffnen und das betroffene Gerät suchen. Bei einem Warnsymbol den Gerätestatus und die Hardware-ID prüfen. Anschließend den passenden Treiber vom Hersteller verwenden."
+    },
+    {
+        "id": 6,
+        "category": "battery",
+        "problem": "Laptop-Akku hält nicht lange",
+        "keywords": [
+            "akku hält nicht lange",
+            "laptop akku schnell leer",
+            "akku schnell leer",
+            "batterie schnell leer",
+            "laptop batterie"
+        ],
+        "diagnosis": [
+            "Akkunutzung prüfen",
+            "Hintergrundprogramme prüfen",
+            "Energieeinstellungen prüfen",
+            "Battery Report erstellen"
+        ],
+        "commands": [
+            "powercfg /batteryreport"
+        ],
+        "solution": "Zuerst Akkunutzung und Hintergrundprogramme prüfen. Anschließend kann mit powercfg /batteryreport ein Windows-Battery-Report erstellt werden, um Design Capacity und Full Charge Capacity zu vergleichen."
+    },
+    {
+        "id": 7,
+        "category": "windows_settings",
+        "problem": "Windows-Einstellung wird nicht gespeichert",
+        "keywords": [
+            "einstellung wird nicht gespeichert",
+            "einstellungen werden nicht gespeichert",
+            "windows einstellung funktioniert nicht",
+            "einstellung wird nicht übernommen",
+            "änderung wird nicht gespeichert"
+        ],
+        "diagnosis": [
+            "Problematische Einstellung identifizieren",
+            "Benutzerrechte prüfen",
+            "UAC prüfen",
+            "Gruppenrichtlinien prüfen",
+            "Einstellung erneut testen"
+        ],
+        "commands": [
+            "gpupdate /force"
+        ],
+        "solution": "Zuerst prüfen, ob der Benutzer die erforderlichen Rechte besitzt. Danach UAC und gegebenenfalls Gruppenrichtlinien prüfen. Registry-Änderungen erst nach einer eindeutigen Diagnose durchführen."
+    }
+]
