@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>IT Support Agent</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+
+        #answer {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f1f1f1;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>IT Support Agent</h1>
+
+    <p>Beschreiben Sie Ihr IT-Problem:</p>
+
+    <textarea
+        id="issue"
+        placeholder="Zum Beispiel: Mein Internet funktioniert nicht."
+    ></textarea>
+
+    <br>
+
+    <button onclick="sendMessage()">
+        Frage stellen
+    </button>
+
+    <div id="answer"></div>
+
+
+    <script>
+        async function sendMessage() {
+
+            const issue = document.getElementById("issue").value;
+            const answer = document.getElementById("answer");
+
+            if (!issue.trim()) {
+                answer.textContent = "Bitte beschreiben Sie Ihr Problem.";
+                return;
+            }
+
+            answer.textContent = "KI denkt nach...";
+
+            try {
+
+                const response = await fetch("/chat", {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        message: issue
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    answer.textContent =
+                        "Fehler: " + (data.details || data.error);
+                    return;
+                }
+
+                answer.textContent = data.answer;
+
+            } catch (error) {
+
+                answer.textContent =
+                    "Verbindungsfehler: " + error.message;
+            }
+        }
+    </script>
+
+</body>
+</html>
