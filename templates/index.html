@@ -1,49 +1,39 @@
 <!DOCTYPE html>
 <html lang="de">
-
 <head>
-
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>IT Support Agent</title>
 
     <style>
-
         body {
             font-family: Arial, sans-serif;
             max-width: 800px;
             margin: 40px auto;
             padding: 20px;
-            background: #ffffff;
-        }
-
-        h1 {
-            margin-bottom: 10px;
         }
 
         textarea {
             width: 100%;
-            height: 120px;
-            padding: 10px;
+            min-height: 120px;
+            padding: 12px;
+            font-size: 16px;
             box-sizing: border-box;
             resize: vertical;
         }
 
         button {
             margin-top: 10px;
-            padding: 10px 20px;
+            padding: 10px 18px;
+            font-size: 16px;
             cursor: pointer;
         }
 
         #answer {
-            margin-top: 30px;
-            padding: 20px;
-            background: #f1f1f1;
+            margin-top: 25px;
+            padding: 15px;
+            border: 1px solid #ccc;
             white-space: pre-wrap;
         }
 
@@ -52,15 +42,7 @@
         }
 
         .question {
-            margin-top: 20px;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-        }
-
-        .question-title {
-            font-weight: bold;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
         }
 
         .option {
@@ -73,48 +55,31 @@
         }
 
         .error {
-            color: #b00020;
-            background: #ffecec;
-            padding: 10px;
-            margin-top: 15px;
+            color: darkred;
         }
-
     </style>
-
 </head>
-
 
 <body>
 
     <h1>IT Support Agent</h1>
 
-    <p>
-        Beschreiben Sie Ihr IT-Problem:
-    </p>
-
+    <label for="issue">
+        <strong>Beschreiben Sie Ihr IT-Problem:</strong>
+    </label>
 
     <textarea
         id="issue"
         placeholder="Zum Beispiel: Mein Internet funktioniert nicht."
     ></textarea>
 
-
-    <br>
-
-
-    <button
-        id="sendProblemButton"
-        onclick="sendProblem()"
-    >
+    <button onclick="sendProblem()">
         Problem analysieren
     </button>
 
-
     <div id="answer"></div>
 
-
     <div id="questions"></div>
-
 
     <button
         id="sendAnswersButton"
@@ -126,75 +91,68 @@
 
     <script>
 
-        let currentProblem = "";
-
         let conversationHistory = [];
 
 
         async function sendProblem() {
 
-            const issue =
-                document.getElementById("issue").value.trim();
-
-            const answer =
-                document.getElementById("answer");
-
-            const questions =
-                document.getElementById("questions");
+            const issue = document
+                .getElementById("issue")
+                .value
+                .trim();
 
             if (!issue) {
 
-                answer.textContent =
-                    "Bitte beschreiben Sie Ihr Problem.";
+                document.getElementById("answer").innerText =
+                    "Bitte beschreiben Sie zuerst Ihr IT-Problem.";
 
                 return;
             }
 
-
-            currentProblem = issue;
-
             conversationHistory = [];
 
+            await sendToAgent(issue);
+        }
 
-            answer.textContent =
-                "IT Support Agent analysiert das Problem...";
 
-            questions.innerHTML = "";
+        async function sendToAgent(message) {
+
+            const answerElement =
+                document.getElementById("answer");
+
+            const questionsElement =
+                document.getElementById("questions");
+
+            answerElement.innerText =
+                "Der IT Support Agent analysiert das Problem...";
+
+            questionsElement.innerHTML = "";
 
             document.getElementById(
                 "sendAnswersButton"
             ).style.display = "none";
 
 
-            await sendToAgent(issue);
-
-        }
-
-
-        async function sendToAgent(message) {
-
-            const answer =
-                document.getElementById("answer");
-
             try {
 
-                const response = await fetch("/chat", {
+                const response = await fetch(
+                    "/chat",
+                    {
+                        method: "POST",
 
-                    method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
 
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
+                        body: JSON.stringify({
 
-                    body: JSON.stringify({
+                            message: message,
 
-                        message: message,
+                            history: conversationHistory
 
-                        history: conversationHistory
-
-                    })
-
-                });
+                        })
+                    }
+                );
 
 
                 const contentType =
@@ -206,14 +164,9 @@
                     const text =
                         await response.text();
 
-                    answer.innerHTML =
-                        '<div class="error">' +
-                        "Serverfehler: " +
-                        text +
-                        "</div>";
-
-                    return;
-
+                    throw new Error(
+                        "Server hat keine JSON-Antwort zurückgegeben."
+                    );
                 }
 
 
@@ -223,15 +176,28 @@
 
                 if (!response.ok) {
 
-                    answer.innerHTML =
-                        '<div class="error">' +
-                        "Fehler: " +
-                        (data.details || data.error) +
-                        "</div>";
-
-                    return;
-
+                    throw new Error(
+                        data.error ||
+                        "Serverfehler"
+                    );
                 }
+
+
+                answerElement.innerText =
+                    data.message || "";
+
+
+                if (data.solution) {
+
+                    answerElement.innerText +=
+                        "\n\nLösung:\n" +
+                        data.solution;
+                }
+
+
+                displayQuestions(
+                    data.questions || []
+                );
 
 
                 conversationHistory.push({
@@ -252,35 +218,14 @@
                 });
 
 
-                answer.textContent =
-                    data.message || "";
+            } catch (error) {
 
-
-                displayQuestions(
-                    data.questions || []
-                );
-
-
-                if (data.solution) {
-
-                    answer.textContent +=
-                        "\n\nLösung:\n" +
-                        data.solution;
-
-                }
-
-            }
-
-            catch (error) {
-
-                answer.innerHTML =
-                    '<div class="error">' +
+                answerElement.innerHTML =
+                    '<span class="error">' +
                     "Verbindungsfehler: " +
                     error.message +
-                    "</div>";
-
+                    "</span>";
             }
-
         }
 
 
@@ -289,21 +234,12 @@
             const container =
                 document.getElementById("questions");
 
-            const sendButton =
-                document.getElementById(
-                    "sendAnswersButton"
-                );
-
-
             container.innerHTML = "";
 
 
             if (!questionList.length) {
 
-                sendButton.style.display = "none";
-
                 return;
-
             }
 
 
@@ -318,57 +254,49 @@
 
 
                     const title =
-                        document.createElement("div");
+                        document.createElement("p");
 
-                    title.className =
-                        "question-title";
-
-                    title.textContent =
-                        question.question;
+                    title.innerHTML =
+                        "<strong>" +
+                        (questionIndex + 1) +
+                        ". " +
+                        question.question +
+                        "</strong>";
 
 
                     questionDiv.appendChild(title);
 
 
-                    const options =
-                        question.options || [];
+                    const type =
+                        question.type === "multiple"
+                            ? "checkbox"
+                            : "radio";
 
 
-                    options.forEach(
+                    (question.options || []).forEach(
                         (option, optionIndex) => {
 
                             const label =
-                                document.createElement(
-                                    "label"
-                                );
+                                document.createElement("label");
 
                             label.className =
                                 "option";
 
 
                             const input =
-                                document.createElement(
-                                    "input"
-                                );
+                                document.createElement("input");
 
-
-                            input.type =
-                                question.type === "multiple"
-                                    ? "checkbox"
-                                    : "radio";
-
+                            input.type = type;
 
                             input.name =
-                                "question-" +
+                                "question_" +
                                 questionIndex;
-
 
                             input.value =
                                 option;
 
 
                             label.appendChild(input);
-
 
                             label.appendChild(
                                 document.createTextNode(
@@ -377,10 +305,7 @@
                             );
 
 
-                            questionDiv.appendChild(
-                                label
-                            );
-
+                            questionDiv.appendChild(label);
                         }
                     );
 
@@ -388,33 +313,31 @@
                     container.appendChild(
                         questionDiv
                     );
-
                 }
             );
 
 
-            sendButton.style.display =
-                "inline-block";
-
+            document.getElementById(
+                "sendAnswersButton"
+            ).style.display = "block";
         }
 
 
         function collectAnswers() {
 
-            const questionDivs =
+            const answers = [];
+
+            const questionElements =
                 document.querySelectorAll(
                     ".question"
                 );
 
 
-            const answers = [];
-
-
-            questionDivs.forEach(
-                (questionDiv, index) => {
+            questionElements.forEach(
+                (questionElement, index) => {
 
                     const selected =
-                        questionDiv.querySelectorAll(
+                        questionElement.querySelectorAll(
                             "input:checked"
                         );
 
@@ -428,30 +351,19 @@
                             values.push(
                                 input.value
                             );
-
                         }
                     );
 
 
-                    answers.push({
-
-                        question:
-                            questionDiv
-                                .querySelector(
-                                    ".question-title"
-                                )
-                                .textContent,
-
-                        answers: values
-
-                    });
-
+                    answers.push(
+                        `Frage ${index + 1}: ` +
+                        values.join(", ")
+                    );
                 }
             );
 
 
-            return answers;
-
+            return answers.join("\n");
         }
 
 
@@ -461,56 +373,23 @@
                 collectAnswers();
 
 
-            const hasAnswer =
-                answers.some(
-                    item =>
-                        item.answers.length > 0
-                );
+            if (!answers.trim()) {
 
-
-            const answer =
-                document.getElementById("answer");
-
-
-            if (!hasAnswer) {
-
-                answer.textContent =
-                    "Bitte beantworten Sie mindestens eine Frage.";
+                document.getElementById(
+                    "answer"
+                ).innerText =
+                    "Bitte wählen Sie mindestens eine Antwort.";
 
                 return;
-
             }
 
 
-            const message =
-                "Der Benutzer hat folgende Fragen beantwortet:\n\n" +
-                JSON.stringify(
-                    answers,
-                    null,
-                    2
-                );
-
-
-            answer.textContent =
-                "IT Support Agent wertet die Antworten aus...";
-
-
-            document.getElementById(
-                "questions"
-            ).innerHTML = "";
-
-
-            document.getElementById(
-                "sendAnswersButton"
-            ).style.display = "none";
-
-
-            await sendToAgent(message);
-
+            await sendToAgent(
+                answers
+            );
         }
 
     </script>
 
 </body>
-
 </html>
